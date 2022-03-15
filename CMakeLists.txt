@@ -1,0 +1,53 @@
+cmake_minimum_required(VERSION 3.14)
+
+project(hydro-gen)
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR})
+
+find_package(OpenGL REQUIRED)
+
+include(cmake/CPM.cmake)
+
+# GLAD
+CPMAddPackage(
+  NAME glad
+  GITHUB_REPOSITORY Dav1dde/glad
+  VERSION 0.1.33
+)
+
+# GLM
+CPMAddPackage(
+  NAME glm
+  GITHUB_REPOSITORY g-truc/glm
+  GIT_TAG 0.9.9.7
+)
+
+# GLFW
+CPMAddPackage(
+  NAME glfw
+  GITHUB_REPOSITORY glfw/glfw
+  GIT_TAG 3.3.2
+  OPTIONS
+	"GLFW_BUILD_TESTS Off"
+	"GLFW_BUILD_EXAMPLES Off"
+	"GLFW_BUILD_DOCS Off"
+    "GLFW_INSTALL Off"
+    "GLFW_USE_HYBRID_HPG On"
+)
+
+set_target_properties(glad glad-generate-files glfw PROPERTIES FOLDER ExternalTargets)
+
+file(GLOB_RECURSE HEADER_FILES CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/*.h")
+file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/*.cpp")
+file(GLOB_RECURSE SHADER_FILES CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/glsl/*.glsl")
+
+add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES} ${SHADER_FILES})
+target_include_directories(${PROJECT_NAME} PUBLIC src)
+
+set(LIBS glad glfw glm)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBS})
